@@ -1,0 +1,112 @@
+{
+  "enabled": {
+    "description": "启用 QQ 排版",
+    "hint": "关掉后原样发送，包括 **、#、表格。",
+    "type": "bool",
+    "default": true
+  },
+  "llm_only": {
+    "description": "只处理 LLM 回复",
+    "hint": "运势、签到、日报等插件自己的文案不会被改。关掉则所有即将发出的纯文本都会排版。",
+    "type": "bool",
+    "default": true
+  },
+  "platforms": {
+    "description": "生效平台",
+    "hint": "默认只改 QQ / OneBot（aiocqhttp）。WebUI 能渲染 Markdown，不要加 webchat。",
+    "type": "list",
+    "items": {
+      "type": "string",
+      "description": "平台名"
+    },
+    "default": ["aiocqhttp"]
+  },
+  "heading_style": {
+    "description": "标题样式",
+    "hint": "bracket 把 # 标题收成【标题】；plain 只去掉井号。",
+    "type": "string",
+    "default": "bracket",
+    "options": ["bracket", "plain"],
+    "labels": ["【标题】", "纯文本"]
+  },
+  "code_block_style": {
+    "description": "代码块样式",
+    "hint": "label 写成【python】再跟代码，方便复制；indent 前空两格；keep 保留 ```。",
+    "type": "string",
+    "default": "label",
+    "options": ["label", "indent", "keep"],
+    "labels": ["【语言】标签", "缩进", "保留围栏"]
+  },
+  "keep_inline_code": {
+    "description": "保留行内 `code` 反引号",
+    "hint": "默认去掉反引号，只留内容。",
+    "type": "bool",
+    "default": false
+  },
+  "outbound_check": {
+    "description": "出站检查（最后一道关）",
+    "type": "object",
+    "items": {
+      "mode": {
+        "description": "模式",
+        "type": "string",
+        "default": "log",
+        "options": ["off", "log", "mask", "drop"],
+        "labels": ["关闭", "只记日志", "打码后发送", "命中就不发"],
+        "hint": "所有要发出的回复（不只模型回复）发前查一遍服务器路径、内部地址、带赋值的凭据、常见令牌、私钥、带账号密码的网址、AstrBot 配置里的密钥，以及下面填的已知密钥、内部主机、私有路径和内部名称。log 只记日志 qq-pretty: outbound hit（规则名和打码片段）；mask 把命中的那一段换成打码文字，其余照发；drop 整条不发，只发下面的拦截提示（没填就什么都不发）。先用 log 看误伤再决定。插件直接调 OneBot 接口发的消息由下面的「也查直接发送」负责。"
+      },
+      "check_direct_sends": {
+        "description": "也查直接发送",
+        "type": "bool",
+        "default": true,
+        "hint": "在 QQ（aiocqhttp）的发送接口上再查一遍，模式同上：其他插件直接调 OneBot 接口发的消息、合并转发（节点昵称和内容）、上传文件的文件名、边生成边发的流式分段都会经过。只看文字，图片、语音和文件内容不查。日志是 qq-pretty: send-layer hit，带动作名和发起的插件名。关掉后只查经过回复流程的消息。"
+      },
+      "mask_text": {
+        "description": "打码文字",
+        "type": "string",
+        "default": "[已隐藏]",
+        "hint": "mask 模式下替换命中片段的文字。留空用 [已隐藏]。"
+      },
+      "drop_notice": {
+        "description": "拦截提示",
+        "type": "string",
+        "default": "",
+        "hint": "drop 模式拦下一条回复时改发这句话，如「这条回复含敏感信息，没有发出」。留空则什么都不发。mask 模式打码不干净时也按 drop 处理。"
+      },
+      "protect_config_secrets": {
+        "description": "保护 AstrBot 配置里的密钥",
+        "type": "bool",
+        "default": true,
+        "hint": "启动时和之后每 5 分钟读一遍 AstrBot 主配置和各插件配置，字段名像 api_key、token、secret、password 的值（至少 8 个字符的 ASCII）当作已知密钥。只放在内存里，日志只记数量和来源文件:字段名，从不记值。"
+      },
+      "known_secrets": {
+        "description": "已知密钥",
+        "type": "list",
+        "items": {"type": "string", "description": "原样匹配的字符串"},
+        "default": [],
+        "hint": "配置文件里没有、但不能发出去的字符串，原样出现在回复里就算命中，少于 8 个字符的不用。只存在插件配置里，日志只记长度。"
+      },
+      "internal_hosts": {
+        "description": "内部主机名",
+        "type": "list",
+        "items": {"type": "string", "description": "主机名，如 my-proxy；末尾 * 当通配，如 bot-*"},
+        "default": [],
+        "hint": "只在 http(s):// 后面当主机名出现时算命中，如 http://my-proxy:8080；正文里单独出现不算。不区分大小写，按原文匹配，不用写正则。已内置 astrbot、napcat、llonebot、lagrange、localhost、回环和内网 IP。"
+      },
+      "private_paths": {
+        "description": "私有路径",
+        "type": "list",
+        "items": {"type": "string", "description": "路径前缀，如 /data/my-bot；末尾 * 当通配"},
+        "default": [],
+        "hint": "以这些前缀开头的路径算命中，/data/my-bot 不会误中 /data/my-botx，网址里的同名路径和 ./ 开头的相对路径也不算。不区分大小写，按原文匹配。已内置 /AstrBot/data、plugin_data/、/data/astrbot 等常见部署目录和 /root/、/home/<用户>/。"
+      },
+      "internal_names": {
+        "description": "内部名称",
+        "type": "list",
+        "items": {"type": "string", "description": "名称，如 mybot-prod-*（至少 3 个字符）"},
+        "default": [],
+        "hint": "在正文任何位置作为完整的词出现就算命中，适合容器名这类独特名字。别填常见词，否则正常聊天也会命中。不区分大小写，少于 3 个字符的不用。"
+      }
+    }
+  }
+}

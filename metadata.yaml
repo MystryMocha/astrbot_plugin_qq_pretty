@@ -1,0 +1,11 @@
+name: astrbot_plugin_qq_pretty
+display_name: QQ Formatter & Outbound Guard
+desc: "Turns LLM Markdown into plain text that reads well in QQ before sending: headings become 【】, list items use ·, tables become 「key: value」 lines, and code blocks get a language label. Also a last outbound check for server paths, internal addresses and credentials, including the secrets already in AstrBot's config, with your own hosts, paths and names added in the config. It checks each reply and, on aiocqhttp, every message sent through the OneBot API (other plugins' direct sends, forwards, file names, streamed segments); it logs, masks the hit or holds the message (log only by default). Applies to aiocqhttp only by default. Admins can run /outbound_guard (/防泄密) to see the check's state and hit counts, or to test which rules a text would hit without it being repeated back."
+short_desc: Markdown to QQ-friendly plain text, plus an outbound leak check
+help: 无需指令即可工作，设置都在插件配置里。管理员可用 /防泄密 看出站检查状态和命中统计，/防泄密 测试 <文本> 看会命中哪些规则（不复述原文），/防泄密 清零 重新统计。
+version: 1.0.0
+author: MystryMocha
+repo: https://github.com/MystryMocha/astrbot_plugin_qq_pretty
+astrbot_version: ">=4.28.1,<5"
+support_platforms:
+  - aiocqhttp
